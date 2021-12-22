@@ -8,37 +8,42 @@ import (
 	"sort"
 )
 
+// Holds information about a single stream/format.
 type SStream struct {
-	URL        string  `json:"url"`
-	Extension  string  `json:"ext"`
-	FileSize   int     `json:"filesize"`
-	ASR        float32 `json:"asr"`
-	TBR        float32 `json:"tbr"`
-	VBR        float32 `json:"vbr"`
-	Quality    int     `json:"quality"`
-	ACodec     string  `json:"acodec"`
-	VCodec     string  `json:"vcodec"`
-	Height     int     `json:"height"`
-	Width      int     `json:"width"`
-	FPS        float32 `json:"fps"`
-	FormatID   string  `json:"format_id"`
-	FormatNote string  `json:"format_note"`
+	URL        string  `json:"url"`         //
+	Extension  string  `json:"ext"`         //
+	FileSize   int     `json:"filesize"`    //
+	ASR        float32 `json:"asr"`         // Audio sample rate.
+	TBR        float32 `json:"tbr"`         //
+	VBR        float32 `json:"vbr"`         // Video bit rate.
+	Quality    int     `json:"quality"`     //
+	ACodec     string  `json:"acodec"`      // Audio codec.
+	VCodec     string  `json:"vcodec"`      // Video Codec.
+	Height     int     `json:"height"`      //
+	Width      int     `json:"width"`       //
+	FPS        float32 `json:"fps"`         //
+	FormatID   string  `json:"format_id"`   //
+	FormatNote string  `json:"format_note"` //
 }
 
 type SStreamSlice []*SStream
 
+// Returns true if the stream is a dash stream.
 func (Me *SStream) IsDash() bool {
 	return (Me.ACodec == "none") != (Me.VCodec == "none")
 }
 
+// Returns true if the stream contains audio data.
 func (Me *SStream) HasAudio() bool {
 	return Me.ACodec != "none"
 }
 
+// Returns true if the stream contains video data.
 func (Me *SStream) HasVideo() bool {
 	return Me.VCodec != "none"
 }
 
+// Downloads the stream file, extension will be added automatically. Will overwrite file if one is already existing!
 func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	if InDestPath == "" {
 		InDestPath = "."
@@ -65,6 +70,7 @@ func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	return err
 }
 
+// Returns a filtered stream list based on 'InFilterPredicate'. Does not modify the original list.
 func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) bool) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	for _, ThisStream := range Me {
@@ -75,6 +81,7 @@ func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) boo
 	return OutStreams
 }
 
+// Returns an ordered stream list based on 'InProperty'. Does not modify the original list. Panics if the propertry does not exist.
 func (Me SStreamSlice) GetOrderedBy(InProperty string) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	OutStreams = append(OutStreams, Me...)

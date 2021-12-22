@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+//
 type SGoTube struct {
 	YTDLPath        string
 	CustomArguments []string
 }
 
+// Initializes the 'SGoTube' struct with given youtube-dl path and custom youtube-dl arguments.
 func Init(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
 	return &SGoTube{
 		YTDLPath:        InYouTubeDLPath,
@@ -22,6 +24,7 @@ func Init(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
 	}
 }
 
+// Returns a new 'SVideo' struct of given video URL.
 func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
 	if strings.Contains(InURL, "playlist?list=") {
 		return nil, errors.New("this is a playlist, use NewPlaylist() instead")
@@ -46,6 +49,7 @@ func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
 	return &OutVideo, nil
 }
 
+// Returns a new 'SPlaylist' struct of given playlist URL.
 func (Me *SGoTube) NewPlaylist(InURL string, InExtractParallel bool) (*SPlaylist, error) {
 	if !strings.Contains(InURL, "playlist?list=") {
 		return nil, errors.New("this is a video, use NewVideo() instead")
@@ -54,8 +58,7 @@ func (Me *SGoTube) NewPlaylist(InURL string, InExtractParallel bool) (*SPlaylist
 	Command := exec.Command(Me.YTDLPath, InURL, "-J", "-s", "-4", "--no-check-certificate", "--flat-playlist")
 	Command.Args = append(Command.Args, Me.CustomArguments...)
 	Command.Stdin = nil
-	//Command.Stdout = nil
-	//Command.Stderr = os.Stdout
+	Command.Stdout = nil
 	JSONBytes, err := Command.Output()
 
 	if err != nil {
