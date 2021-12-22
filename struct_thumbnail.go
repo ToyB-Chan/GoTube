@@ -5,17 +5,17 @@ import (
 	"sort"
 )
 
-// Holds information about a single thumbnail.
+// This holds all information about a thumbnail.
 type SThumbnail struct {
-	ID     int    `json:"id"`     //
-	URL    string `json:"url"`    //
-	Height int    `json:"height"` //
-	Width  int    `json:"width"`  //
+	ID     int    `json:"id"`     // The thumbnail ID.
+	URL    string `json:"url"`    // The thumbnail URL.
+	Height int    `json:"height"` // The thumbnail height.
+	Width  int    `json:"width"`  // The thumbnail width.
 }
 
 type SThumbnailSlice []*SThumbnail
 
-// Returns a filtered thumbnail list based on 'InFilterPredicate'. Does not modify the original list.
+// GetFiltered returns a list of thumbnails that match the specified filter function. It does not modify the original list.
 func (Me SThumbnailSlice) GetFiltered(InFilterPredicate func(InThumbnail *SThumbnail) bool) SThumbnailSlice {
 	OutThumbnails := SThumbnailSlice{}
 	for _, ThisThumbnail := range Me {
@@ -26,7 +26,7 @@ func (Me SThumbnailSlice) GetFiltered(InFilterPredicate func(InThumbnail *SThumb
 	return OutThumbnails
 }
 
-// Returns an ordered thumbnail list based on 'InProperty'. Does not modify the original list. Panics if the propertry does not exist.
+// GetOrderBy returns a list of thumbnails sorted by the specified property. It does not modify the original list. It panics if the property is not found.
 func (Me SThumbnailSlice) GetOrderedBy(InProperty string) SThumbnailSlice {
 	OutThumbnails := SThumbnailSlice{}
 	OutThumbnails = append(OutThumbnails, Me...)

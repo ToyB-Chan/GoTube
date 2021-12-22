@@ -8,42 +8,42 @@ import (
 	"sort"
 )
 
-// Holds information about a single stream/format.
+// This holds all important (and not so important) information about a video stream.
 type SStream struct {
-	URL        string  `json:"url"`         //
-	Extension  string  `json:"ext"`         //
-	FileSize   int     `json:"filesize"`    //
-	ASR        float32 `json:"asr"`         // Audio sample rate.
-	TBR        float32 `json:"tbr"`         //
-	VBR        float32 `json:"vbr"`         // Video bit rate.
-	Quality    int     `json:"quality"`     //
-	ACodec     string  `json:"acodec"`      // Audio codec.
-	VCodec     string  `json:"vcodec"`      // Video Codec.
-	Height     int     `json:"height"`      //
-	Width      int     `json:"width"`       //
-	FPS        float32 `json:"fps"`         //
-	FormatID   string  `json:"format_id"`   //
-	FormatNote string  `json:"format_note"` //
+	URL        string  `json:"url"`         // URL of the stream.
+	Extension  string  `json:"ext"`         // File extension of the stream.
+	FileSize   int     `json:"filesize"`    // File size of the stream.
+	ASR        float32 `json:"asr"`         // Audio sample rate used.
+	TBR        float32 `json:"tbr"`         // I don't know. But it's there and sure useful for someone.
+	VBR        float32 `json:"vbr"`         // Video bit rate used.
+	Quality    int     `json:"quality"`     // Quality of the stream. This correspons to the quality setting when watching youtube videos.
+	ACodec     string  `json:"acodec"`      // The audio codec used.
+	VCodec     string  `json:"vcodec"`      // The video codec used.
+	Height     int     `json:"height"`      // Height of the video.
+	Width      int     `json:"width"`       // Width of the video.
+	FPS        float32 `json:"fps"`         // Frames per second of the video.
+	FormatID   string  `json:"format_id"`   // Format ID of the stream. See https://gist.github.com/AgentOak/34d47c65b1d28829bb17c24c04a0096f for more.
+	FormatNote string  `json:"format_note"` // Format note of the stream.
 }
 
 type SStreamSlice []*SStream
 
-// Returns true if the stream is a dash stream.
+// IsDash returns true if the stream is a dash stream, false otherwise.
 func (Me *SStream) IsDash() bool {
 	return (Me.ACodec == "none") != (Me.VCodec == "none")
 }
 
-// Returns true if the stream contains audio data.
+// HasAudio returns true if the stream contains audio data.
 func (Me *SStream) HasAudio() bool {
 	return Me.ACodec != "none"
 }
 
-// Returns true if the stream contains video data.
+// HasVideo returns true if the stream contains video data.
 func (Me *SStream) HasVideo() bool {
 	return Me.VCodec != "none"
 }
 
-// Downloads the stream file. File extension will be added automatically. Will overwrite file if one is already there!
+// Download downloads the stream to the specified Path\File. File extension is automatically added. File is overwritten if it already exists. It returns any errors encounterd.
 func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	if InDestPath == "" {
 		InDestPath = "."
@@ -70,7 +70,7 @@ func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	return err
 }
 
-// Returns a filtered stream list based on 'InFilterPredicate'. Does not modify the original list.
+// GetFiltered returns a list of streams that match the specified filter function. It does not modify the original list.
 func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) bool) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	for _, ThisStream := range Me {
@@ -81,7 +81,7 @@ func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) boo
 	return OutStreams
 }
 
-// Returns an ordered stream list based on 'InProperty'. Does not modify the original list. Panics if the propertry does not exist.
+// GetOrderBy returns a list of streams sorted by the specified property. It does not modify the original list. It panics if the property is not found.
 func (Me SStreamSlice) GetOrderedBy(InProperty string) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	OutStreams = append(OutStreams, Me...)

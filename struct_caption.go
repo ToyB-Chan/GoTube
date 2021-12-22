@@ -1,6 +1,6 @@
 package gotube
 
-// Holds information about a single caption. Not implemented yet.
+// This holds information about a caption. Not implemented yet.
 type SCaption struct {
 	URL       string `json:"url"` //
 	Extension string `json:"ext"` //

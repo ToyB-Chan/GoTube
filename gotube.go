@@ -10,21 +10,21 @@ import (
 	"time"
 )
 
-// Use this structs methods to request videos/playlists.
+// Use this structs methods to extract video/playlist data.
 type SGoTube struct {
 	YTDLPath        string
 	CustomArguments []string
 }
 
-// Returns a new 'SGoTube' struct. You can set the path to 'youtube-dl' here as well as set custom arguments. Use this structs methods to request videos/playlists.
-func Init(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
+// New is a constructor for 'SGoTube'. Here you can set the path to the youtube-dl binary and custom arguments. Use this structs methods to extract video/playlist data.
+func New(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
 	return &SGoTube{
 		YTDLPath:        InYouTubeDLPath,
 		CustomArguments: InCustomArguments,
 	}
 }
 
-// Returns a new 'SVideo' struct of given video URL.
+// NewVideo extracts video information from given video URL. It returns a new 'SVideo' struct and any errors encountered.
 func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
 	if strings.Contains(InURL, "playlist?list=") {
 		return nil, errors.New("this is a playlist, use NewPlaylist() instead")
@@ -49,7 +49,7 @@ func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
 	return &OutVideo, nil
 }
 
-// Returns a new 'SPlaylist' struct of given playlist URL.
+// NewPlaylist extracts playlist information from given playlist URL. It returns a new 'SPlaylist' struct and any errors encountered.
 func (Me *SGoTube) NewPlaylist(InURL string, InExtractParallel bool) (*SPlaylist, error) {
 	if !strings.Contains(InURL, "playlist?list=") {
 		return nil, errors.New("this is a video, use NewVideo() instead")
