@@ -26,7 +26,7 @@ func (Me SThumbnailSlice) GetFiltered(InFilterPredicate func(InThumbnail *SThumb
 	return OutThumbnails
 }
 
-// GetOrderBy returns a list of thumbnails sorted by the specified property. It does not modify the original list. It panics if the property is not found.
+// GetOrderedBy returns a list of thumbnails sorted by the specified property. It does not modify the original list. It panics if the property is not found.
 func (Me SThumbnailSlice) GetOrderedBy(InProperty string) SThumbnailSlice {
 	OutThumbnails := SThumbnailSlice{}
 	OutThumbnails = append(OutThumbnails, Me...)
