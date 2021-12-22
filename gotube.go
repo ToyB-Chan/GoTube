@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-//
+// Use this structs methods to request videos/playlists.
 type SGoTube struct {
 	YTDLPath        string
 	CustomArguments []string
 }
 
-// Initializes the 'SGoTube' struct with given youtube-dl path and custom youtube-dl arguments.
+// Returns a new 'SGoTube' struct. You can set the path to 'youtube-dl' here as well as set custom arguments. Use this structs methods to request videos/playlists.
 func Init(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
 	return &SGoTube{
 		YTDLPath:        InYouTubeDLPath,

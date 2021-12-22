@@ -43,7 +43,7 @@ func (Me *SStream) HasVideo() bool {
 	return Me.VCodec != "none"
 }
 
-// Downloads the stream file, extension will be added automatically. Will overwrite file if one is already existing!
+// Downloads the stream file. File extension will be added automatically. Will overwrite file if one is already there!
 func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	if InDestPath == "" {
 		InDestPath = "."
