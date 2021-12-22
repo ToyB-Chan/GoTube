@@ -23,7 +23,7 @@ type SVideo struct {
 
 type SVideoSlice []*SVideo
 
-// IsAgeRestricted returns true if the video is age restricted, false otherwise.
+// IsAgeRestricted returns true if the video is age restricted.
 func (Me *SVideo) IsAgeRestricted() bool {
 	return Me.AgeLimit > 0
 }

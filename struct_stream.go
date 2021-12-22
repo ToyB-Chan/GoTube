@@ -13,10 +13,10 @@ type SStream struct {
 	URL        string  `json:"url"`         // URL of the stream.
 	Extension  string  `json:"ext"`         // File extension of the stream.
 	FileSize   int     `json:"filesize"`    // File size of the stream.
-	ASR        float32 `json:"asr"`         // Audio sample rate used.
+	ASR        float32 `json:"asr"`         // The audio sample rate used.
 	TBR        float32 `json:"tbr"`         // I don't know. But it's there and sure useful for someone.
-	VBR        float32 `json:"vbr"`         // Video bit rate used.
-	Quality    int     `json:"quality"`     // Quality of the stream. This correspons to the quality setting when watching youtube videos.
+	VBR        float32 `json:"vbr"`         // The video bit rate used.
+	Quality    int     `json:"quality"`     // Quality of the stream. This corresponds to the quality setting when watching youtube videos.
 	ACodec     string  `json:"acodec"`      // The audio codec used.
 	VCodec     string  `json:"vcodec"`      // The video codec used.
 	Height     int     `json:"height"`      // Height of the video.
@@ -28,7 +28,7 @@ type SStream struct {
 
 type SStreamSlice []*SStream
 
-// IsDash returns true if the stream is a dash stream, false otherwise.
+// IsDash returns true if the stream is a dash stream.
 func (Me *SStream) IsDash() bool {
 	return (Me.ACodec == "none") != (Me.VCodec == "none")
 }
