@@ -46,7 +46,7 @@ func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
 	return &OutVideo, nil
 }
 
-func (Me *SGoTube) NewPlaylist(InURL string) (*SPlaylist, error) {
+func (Me *SGoTube) NewPlaylist(InURL string, InExtractParallel bool) (*SPlaylist, error) {
 	if !strings.Contains(InURL, "playlist?list=") {
 		return nil, errors.New("this is a video, use NewVideo() instead")
 	}
@@ -75,7 +75,11 @@ func (Me *SGoTube) NewPlaylist(InURL string) (*SPlaylist, error) {
 	}
 
 	for i, ThisVideo := range OutPlaylist.Videos {
-		go parallelFetcher(i, "https://youtube.com/watch?v="+ThisVideo.ID)
+		if InExtractParallel {
+			go parallelFetcher(i, "https://youtube.com/watch?v="+ThisVideo.ID)
+		} else {
+			parallelFetcher(i, "https://youtube.com/watch?v="+ThisVideo.ID)
+		}
 	}
 
 	WaitGroup.Wait()
