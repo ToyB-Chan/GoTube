@@ -15,7 +15,7 @@ type SThumbnail struct {
 
 type SThumbnailSlice []*SThumbnail
 
-// GetFiltered returns a list of thumbnails that match the specified filter function. It does not modify the original list.
+// Returns a list of thumbnails that match the specified filter function. It does not modify the original list.
 func (Me SThumbnailSlice) GetFiltered(InFilterPredicate func(InThumbnail *SThumbnail) bool) SThumbnailSlice {
 	OutThumbnails := SThumbnailSlice{}
 	for _, ThisThumbnail := range Me {
@@ -26,7 +26,7 @@ func (Me SThumbnailSlice) GetFiltered(InFilterPredicate func(InThumbnail *SThumb
 	return OutThumbnails
 }
 
-// GetOrderedBy returns a list of thumbnails sorted by the specified property. It does not modify the original list. It panics if the property is not found.
+// Returns a list of thumbnails sorted by the specified property. It does not modify the original list. It panics if the property is not found.
 func (Me SThumbnailSlice) GetOrderedBy(InProperty string) SThumbnailSlice {
 	OutThumbnails := SThumbnailSlice{}
 	OutThumbnails = append(OutThumbnails, Me...)

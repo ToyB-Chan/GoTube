@@ -28,22 +28,22 @@ type SStream struct {
 
 type SStreamSlice []*SStream
 
-// IsDash returns true if the stream is a dash stream.
+// Returns true if the stream is a dash stream.
 func (Me *SStream) IsDash() bool {
 	return (Me.ACodec == "none") != (Me.VCodec == "none")
 }
 
-// HasAudio returns true if the stream contains audio data.
+// Returns true if the stream contains audio data.
 func (Me *SStream) HasAudio() bool {
 	return Me.ACodec != "none"
 }
 
-// HasVideo returns true if the stream contains video data.
+// Returns true if the stream contains video data.
 func (Me *SStream) HasVideo() bool {
 	return Me.VCodec != "none"
 }
 
-// Download downloads the stream to the specified Path\File. File extension is automatically added. File is overwritten if it already exists. It returns any errors encounterd.
+// Downloads the stream to the specified Path\File. File extension is automatically added. File is overwritten if it already exists. It returns any errors encounterd.
 func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	if InDestPath == "" {
 		InDestPath = "."
@@ -70,7 +70,7 @@ func (Me *SStream) Download(InDestPath string, InDestFile string) error {
 	return err
 }
 
-// GetFiltered returns a list of streams that match the specified filter function. It does not modify the original list.
+// Returns a list of streams that match the specified filter function. It does not modify the original list.
 func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) bool) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	for _, ThisStream := range Me {
@@ -81,7 +81,7 @@ func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) boo
 	return OutStreams
 }
 
-// GetOrderedBy returns a list of streams sorted by the specified property. It does not modify the original list. It panics if the property is not found.
+// Returns a list of streams sorted by the specified property. It does not modify the original list. It panics if the property is not found.
 func (Me SStreamSlice) GetOrderedBy(InProperty string) SStreamSlice {
 	OutStreams := SStreamSlice{}
 	OutStreams = append(OutStreams, Me...)
