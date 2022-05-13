@@ -11,80 +11,80 @@ import (
 )
 
 // Use this structs methods to extract video/playlist data.
-type SGoTube struct {
-	YTDLPath        string
+type GoTubeClient struct {
+	YoutubeDlPath   string
 	CustomArguments []string
 }
 
-// This is a constructor for 'SGoTube'. Here you can set the path to the youtube-dl binary and custom arguments. Use this structs methods to extract video/playlist data. Returns a new 'SGoTube' struct.
-func New(InYouTubeDLPath string, InCustomArguments []string) *SGoTube {
-	return &SGoTube{
-		YTDLPath:        InYouTubeDLPath,
-		CustomArguments: InCustomArguments,
+// This is a constructor for 'GoTubeClient'. Here you can set the path to the youtube-dl binary and custom arguments. Use this structs methods to extract video/playlist data. Returns a new 'SGoTube' struct.
+func New(youtubeDlPath string, customArgs []string) *GoTubeClient {
+	return &GoTubeClient{
+		YoutubeDlPath:   youtubeDlPath,
+		CustomArguments: customArgs,
 	}
 }
 
-// Extracts video information from given video URL. Returns a new 'SVideo' struct and any errors encountered.
-func (Me *SGoTube) NewVideo(InURL string) (*SVideo, error) {
-	if strings.Contains(InURL, "playlist?list=") {
+// Extracts video information from given video URL. Returns a new 'Video' struct and any errors encountered.
+func (gtc *GoTubeClient) NewVideo(url string) (*Video, error) {
+	if strings.Contains(url, "playlist?list=") {
 		return nil, errors.New("this is a playlist, use NewPlaylist() instead")
 	}
 
-	Command := exec.Command(Me.YTDLPath, InURL, "-J", "-s", "-4", "--no-check-certificate")
-	Command.Args = append(Command.Args, Me.CustomArguments...)
-	Command.Stdin = nil
-	Command.Stdout = nil
-	JSONBytes, err := Command.Output()
+	cmd := exec.Command(gtc.YoutubeDlPath, url, "-J", "-s", "-4", "--no-check-certificate")
+	cmd.Args = append(cmd.Args, gtc.CustomArguments...)
+	cmd.Stdin = nil
+	cmd.Stdout = nil
+	jsonBytes, err := cmd.Output()
 
 	if err != nil {
 		return nil, err
 	}
 
-	OutVideo := SVideo{}
-	json.Unmarshal(JSONBytes, &OutVideo)
-	json.Unmarshal(JSONBytes, &OutVideo.Uploader)
+	video := Video{}
+	json.Unmarshal(jsonBytes, &video)
+	json.Unmarshal(jsonBytes, &video.Uploader)
 
-	ConvertedTime, _ := time.Parse("20060102", OutVideo.UploadDate)
-	OutVideo.UploadDate = fmt.Sprint(ConvertedTime.Unix())
-	return &OutVideo, nil
+	ConvertedTime, _ := time.Parse("20060102", video.UploadDate)
+	video.UploadDate = fmt.Sprint(ConvertedTime.Unix())
+	return &video, nil
 }
 
-// Extracts playlist information from given playlist URL. Returns a new 'SPlaylist' struct and any errors encountered.
-func (Me *SGoTube) NewPlaylist(InURL string, InExtractParallel bool) (*SPlaylist, error) {
-	if !strings.Contains(InURL, "playlist?list=") {
+// Extracts playlist information from given playlist URL. Returns a new 'Playlist' struct and any errors encountered.
+func (gtc *GoTubeClient) NewPlaylist(url string, extractParallel bool) (*Playlist, error) {
+	if !strings.Contains(url, "playlist?list=") {
 		return nil, errors.New("this is a video, use NewVideo() instead")
 	}
 
-	Command := exec.Command(Me.YTDLPath, InURL, "-J", "-s", "-4", "--no-check-certificate", "--flat-playlist")
-	Command.Args = append(Command.Args, Me.CustomArguments...)
-	Command.Stdin = nil
-	Command.Stdout = nil
-	JSONBytes, err := Command.Output()
+	cmd := exec.Command(gtc.YoutubeDlPath, url, "-J", "-s", "-4", "--no-check-certificate", "--flat-playlist")
+	cmd.Args = append(cmd.Args, gtc.CustomArguments...)
+	cmd.Stdin = nil
+	cmd.Stdout = nil
+	jsonBytes, err := cmd.Output()
 
 	if err != nil {
 		return nil, err
 	}
 
-	OutPlaylist := SPlaylist{}
+	playlist := Playlist{}
 
-	json.Unmarshal(JSONBytes, &OutPlaylist)
-	json.Unmarshal(JSONBytes, &OutPlaylist.Uploader)
+	json.Unmarshal(jsonBytes, &playlist)
+	json.Unmarshal(jsonBytes, &playlist.Uploader)
 
-	WaitGroup := sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 	parallelFetcher := func(InIndex int, InURL string) {
-		WaitGroup.Add(1)
-		OutPlaylist.Videos[InIndex], _ = Me.NewVideo(InURL)
-		WaitGroup.Done()
+		wg.Add(1)
+		playlist.Videos[InIndex], _ = gtc.NewVideo(InURL)
+		wg.Done()
 	}
 
-	for i, ThisVideo := range OutPlaylist.Videos {
-		if InExtractParallel {
-			go parallelFetcher(i, "https://youtube.com/watch?v="+ThisVideo.ID)
+	for i, vid := range playlist.Videos {
+		if extractParallel {
+			go parallelFetcher(i, "https://youtube.com/watch?v="+vid.ID)
 		} else {
-			parallelFetcher(i, "https://youtube.com/watch?v="+ThisVideo.ID)
+			parallelFetcher(i, "https://youtube.com/watch?v="+vid.ID)
 		}
 	}
 
-	WaitGroup.Wait()
-	return &OutPlaylist, nil
+	wg.Wait()
+	return &playlist, nil
 }

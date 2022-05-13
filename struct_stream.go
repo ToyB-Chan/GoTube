@@ -9,7 +9,7 @@ import (
 )
 
 // This holds all important (and not so important) information about a video stream.
-type SStream struct {
+type Stream struct {
 	URL        string  `json:"url"`         // The URL of the stream.
 	Extension  string  `json:"ext"`         // The file extension of the stream.
 	FileSize   int     `json:"filesize"`    // The file size of the stream.
@@ -26,80 +26,84 @@ type SStream struct {
 	FormatNote string  `json:"format_note"` // The format note of the stream.
 }
 
-type SStreamSlice []*SStream
+type Streams []*Stream
 
 // Returns true if the stream is a dash stream.
-func (Me *SStream) IsDash() bool {
-	return (Me.ACodec == "none") != (Me.VCodec == "none")
+func (s *Stream) IsDash() bool {
+	return (s.ACodec == "none") != (s.VCodec == "none")
 }
 
 // Returns true if the stream contains audio data.
-func (Me *SStream) HasAudio() bool {
-	return Me.ACodec != "none"
+func (s *Stream) HasAudio() bool {
+	return s.ACodec != "none"
 }
 
 // Returns true if the stream contains video data.
-func (Me *SStream) HasVideo() bool {
-	return Me.VCodec != "none"
+func (s *Stream) HasVideo() bool {
+	return s.VCodec != "none"
 }
 
-// Downloads the stream file to the specified Path\File. File extension is automatically added. File is overwritten if it already exists. Returns any errors encounterd.
-func (Me *SStream) Download(InDestPath string, InDestFile string) error {
-	if InDestPath == "" {
-		InDestPath = "."
+// Downloads the stream file to the specified Path\File. File extension is automatically added. File is overwritten if it already exists. Returns any errors encountered.
+func (s *Stream) Download(destPath string, destFile string) error {
+	if destPath == "" {
+		destPath = "."
 	}
-	if InDestFile == "" {
-		InDestFile = "download"
+	if destFile == "" {
+		destFile = "download"
 	}
 
-	CombinedPath := InDestPath + "\\" + InDestFile + "." + Me.Extension
+	combinedPath := destPath + "\\" + destFile + "." + s.Extension
 
-	File, err := os.Create(CombinedPath)
+	file, err := os.Create(combinedPath)
 	if err != nil {
 		return err
 	}
-	defer File.Close()
+	defer file.Close()
 
-	Resp, err := http.Get(Me.URL)
+	resp, err := http.Get(s.URL)
 	if err != nil {
 		return err
 	}
-	defer Resp.Body.Close()
+	defer resp.Body.Close()
 
-	_, err = io.Copy(File, Resp.Body)
+	_, err = io.Copy(file, resp.Body)
 	return err
 }
 
 // Returns a list of streams that match the specified filter function. It does not modify the original list.
-func (Me SStreamSlice) GetFiltered(InFilterPredicate func(InStream *SStream) bool) SStreamSlice {
-	OutStreams := SStreamSlice{}
-	for _, ThisStream := range Me {
-		if InFilterPredicate(ThisStream) {
-			OutStreams = append(OutStreams, ThisStream)
+func (s Streams) Filtered(predicate func(s *Stream) bool) Streams {
+	streams := Streams{}
+	for _, stream := range s {
+		if predicate(stream) {
+			streams = append(streams, stream)
 		}
 	}
-	return OutStreams
+	return streams
 }
 
 // Returns a list of streams sorted by the specified property. It does not modify the original list. It panics if the property is not found.
-func (Me SStreamSlice) GetOrderedBy(InProperty string) SStreamSlice {
-	OutStreams := SStreamSlice{}
-	OutStreams = append(OutStreams, Me...)
+func (s Streams) OrderedBy(property string) Streams {
+	streams := Streams{}
+	streams = append(streams, s...)
 
-	if !reflect.ValueOf(*OutStreams[0]).FieldByName(InProperty).IsValid() {
-		panic("property '" + InProperty + "' does not exist")
+	if !reflect.ValueOf(*streams[0]).FieldByName(property).IsValid() {
+		panic("property '" + property + "' does not exist")
 	}
 
-	IsPropertyFloat := reflect.ValueOf(*OutStreams[0]).FieldByName(InProperty).Kind() == reflect.Float32
-	sort.Slice(OutStreams, func(i, j int) bool {
-		RefElemI := reflect.ValueOf(*OutStreams[i])
-		RefElemJ := reflect.ValueOf(*OutStreams[j])
+	isFloat := reflect.ValueOf(*streams[0]).FieldByName(property).Kind() == reflect.Float32
+	isInt := reflect.ValueOf(*streams[0]).FieldByName(property).Kind() == reflect.Int
 
-		if IsPropertyFloat {
-			return RefElemI.FieldByName(InProperty).Float() < RefElemJ.FieldByName(InProperty).Float()
+	sort.Slice(streams, func(i, j int) bool {
+		refElemI := reflect.ValueOf(*streams[i])
+		refElemJ := reflect.ValueOf(*streams[j])
+
+		if isFloat {
+			return refElemI.FieldByName(property).Float() < refElemJ.FieldByName(property).Float()
+		} else if isInt {
+			return refElemI.FieldByName(property).Int() < refElemJ.FieldByName(property).Int()
 		} else {
-			return RefElemI.FieldByName(InProperty).Int() < RefElemJ.FieldByName(InProperty).Int()
+			panic("property '" + property + "' is not a int/float value")
 		}
 	})
-	return OutStreams
+	return streams
 }
